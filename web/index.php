@@ -2,24 +2,51 @@
 
 require('../vendor/autoload.php');
 
-$app = new Silex\Application();
-$app['debug'] = true;
+$url = "https://api-dialogflow.herokuapp.com/dialogflow";
 
-// Register the monolog logging service
-$app->register(new Silex\Provider\MonologServiceProvider(), array(
-  'monolog.logfile' => 'php://stderr',
-));
+//INICIA O CURL
+$curl = curl_init();
 
-// Register view rendering
-$app->register(new Silex\Provider\TwigServiceProvider(), array(
-    'twig.path' => __DIR__.'/views',
-));
+$headers = [
+    'Authorization: Bearer PROD_ACCESS_TOKEN',
+    'Content-Type: application/json'   
+];
 
-// Our web handlers
+$pergunta = $_REQUEST['pergunta'];
 
-$app->get('/', function() use($app) {
-  $app['monolog']->addDebug('logging output.');
-  return $app['twig']->render('index.twig');
-});
+//POST POST
 
-$app->run();
+$post = [
+  
+   "queryText" => $pergunta,
+   "sessionId" => "12345asde",
+   "languageCode" => "pt-BR"
+];
+
+
+$json = json_encode($post);
+
+curl_setopt_array($curl, [
+    CURLOPT_URL                 => $url,
+    CURLOPT_CUSTOMREQUEST       => 'POST',
+    CURLOPT_RETURNTRANSFER      => true,
+    CURLOPT_HTTPHEADER          => $headers,
+    CURLOPT_POSTFIELDS          => $json
+
+]);
+
+
+//EXECUTA A REQUISIÇÃO
+$response = curl_exec($curl);
+
+
+//FECHA A CONEXÃO
+curl_close($curl);
+
+
+//IMPRIME O RESPONSE
+$array = $response;
+//var_dump($array); 
+echo $array;
+
+?>
